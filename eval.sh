@@ -3,8 +3,11 @@
 # 引数からモデル名を取得
 MODEL_NAME=$1
 
-# tmp/MODEL_NAME/tasks/001 にディレクトリを作成
-mkdir -p ./tmp/$MODEL_NAME/tasks/001
+# 引数からタスク名を取得
+TASK_NAME=$2
+
+# tmp/$MODEL_NAME/$TASK_NAME ディレクトリを作成
+mkdir -p ./tmp/$MODEL_NAME/$TASK_NAME
 
 # 何回成功したかを保存する変数
 PASS_COUNT=0
