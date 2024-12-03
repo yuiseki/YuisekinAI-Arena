@@ -135,17 +135,37 @@ function App() {
   return (
     <div
       style={{
+        display: "flex",
+        flexDirection: "column",
         width: "100vw",
-        height: "100vh",
+        gap: "10px",
       }}
     >
-      {myDuckDB && duckdbLoaded && (
-        <MapWithOllamaModel
-          db={myDuckDB}
-          summaryOfTableSchemes={summaryOfTableSchemes!}
-          modelName="llama3.2:1b"
-        />
-      )}
+      {myDuckDB &&
+        duckdbLoaded &&
+        ["gemma2:2b", "llama3.2:1b"].map((modelName) => (
+          <div
+            key={modelName}
+            style={{
+              display: "flex",
+              width: "100vw",
+              height: "20vh",
+            }}
+          >
+            <div
+              style={{
+                marginRight: "10px",
+              }}
+            >
+              {modelName}
+            </div>
+            <MapWithOllamaModel
+              db={myDuckDB}
+              summaryOfTableSchemes={summaryOfTableSchemes!}
+              modelName="llama3.2:1b"
+            />
+          </div>
+        ))}
     </div>
   );
 }

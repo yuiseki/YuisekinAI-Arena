@@ -116,11 +116,13 @@ export const MapWithOllamaModel: React.FC<{
   summaryOfTableSchemes: string;
   modelName: string;
 }> = ({ db, summaryOfTableSchemes, modelName }) => {
+  const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState<string | null>(null);
 
   useEffect(() => {
     const doit = async () => {
-      setQuery(null);
+      if (loading) return;
+      setLoading(true);
 
       const prompt = `You are an expert of PostgreSQL and PostGIS. You output the best PostgreSQL query based on given table schema and input text.
 
@@ -155,6 +157,10 @@ What is the most populous country in the world?
           stream: false,
           model: modelName,
           prompt,
+          options: {
+            temperature: 0.0,
+            num_ctx: 1024,
+          },
         }),
       });
       const resJson = await res.json();
@@ -168,7 +174,7 @@ What is the most populous country in the world?
     };
 
     doit();
-  }, [summaryOfTableSchemes, modelName]);
+  }, [summaryOfTableSchemes, modelName, query, loading]);
 
   return query ? (
     <MapWithDuckDBAndQuery db={db} query={query} />

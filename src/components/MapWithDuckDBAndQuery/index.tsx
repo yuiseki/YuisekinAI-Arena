@@ -38,12 +38,14 @@ export const MapWithDuckDBAndQuery: React.FC<{
         features: resultFeatures,
       };
       setResults(resultGeoJson);
-      fitBoundsToGeoJson(mapRef, resultGeoJson, {
-        top: 100,
-        bottom: 100,
-        left: 100,
-        right: 100,
-      });
+      setTimeout(() => {
+        fitBoundsToGeoJson(mapRef, resultGeoJson, {
+          top: 10,
+          bottom: 10,
+          left: 10,
+          right: 10,
+        });
+      }, 100);
       await conn.close();
     };
     doit();
@@ -53,7 +55,7 @@ export const MapWithDuckDBAndQuery: React.FC<{
     <MapProvider>
       <Map
         ref={mapRef}
-        style={{ width: "100vw", height: "100vh" }}
+        style={{ width: "100%", height: "100%" }}
         initialViewState={{
           latitude: 0,
           longitude: 0,
