@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import "./App.css";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useState } from "react";
@@ -8,8 +7,8 @@ import duckdb_wasm from "@duckdb/duckdb-wasm/dist/duckdb-mvp.wasm?url";
 import mvp_worker from "@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js?url";
 import duckdb_wasm_eh from "@duckdb/duckdb-wasm/dist/duckdb-eh.wasm?url";
 import eh_worker from "@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url";
-import { StructRowProxy } from "apache-arrow";
 import { MapWithOllamaModel } from "./components/MapWithOllamaModel";
+import { ollamaModels } from "./lib/ollama/ollamaModels";
 
 const MANUAL_BUNDLES: duckdb.DuckDBBundles = {
   mvp: {
@@ -40,27 +39,10 @@ const initDuckDB = async (
   `);
 };
 
-type MyDuckDBTableColumn = {
-  column_name: string;
-  column_type: string;
-  null: string;
-  key: string | null;
-  default: string | null;
-  extra: string | null;
-};
-
-type MyDuckDBTableSchema = {
-  tableName: string;
-  columns: MyDuckDBTableColumn[];
-};
-
 function App() {
   const [duckdbInitialized, setDuckDBInitialized] = useState(false);
   const [duckdbLoaded, setDuckDBLoaded] = useState(false);
   const [myDuckDB, setMyDuckDB] = useState<duckdb.AsyncDuckDB | null>(null);
-  const [summaryOfTableSchemes, setSummaryOfTableSchemes] = useState<
-    string | null
-  >(null);
 
   // initialize DuckDB
   useEffect(() => {
@@ -92,46 +74,6 @@ function App() {
     doit();
   }, [duckdbInitialized, myDuckDB]);
 
-  useEffect(() => {
-    // get table schema
-    const doit = async () => {
-      if (!myDuckDB || !duckdbLoaded) {
-        return;
-      }
-      const conn = await myDuckDB.connect();
-      const result1 = await conn.query(`
-        SHOW;
-      `);
-      const resultRows1: StructRowProxy<any>[] = result1.toArray();
-      const newTableSchemes: MyDuckDBTableSchema[] = [];
-      for (const row1 of resultRows1) {
-        const table = row1.toJSON();
-        const tableName = table.name as string;
-        const result2 = await conn.query(`
-          DESCRIBE TABLE ${tableName};
-        `);
-        const resultRows2: StructRowProxy<any>[] = result2.toArray();
-        newTableSchemes.push({
-          tableName: tableName,
-          columns: resultRows2.map((row) =>
-            row.toJSON()
-          ) as MyDuckDBTableColumn[],
-        });
-      }
-      const summaryOfTableSchemes =
-        "Summary of tables:" +
-        newTableSchemes.map((tableScheme) => {
-          return `\n${tableScheme.tableName}:\n${tableScheme.columns
-            .map((column) => {
-              return `  ${column.column_name}: ${column.column_type}`;
-            })
-            .join("\n")}`;
-        });
-      setSummaryOfTableSchemes(summaryOfTableSchemes);
-    };
-    doit();
-  }, [duckdbLoaded, myDuckDB]);
-
   return (
     <div
       style={{
@@ -143,9 +85,9 @@ function App() {
     >
       {myDuckDB &&
         duckdbLoaded &&
-        ["gemma2:2b", "llama3.2:1b"].map((modelName) => (
+        ollamaModels.map((model) => (
           <div
-            key={modelName}
+            key={model.modelName}
             style={{
               display: "flex",
               width: "100vw",
@@ -157,13 +99,9 @@ function App() {
                 marginRight: "10px",
               }}
             >
-              {modelName}
+              {model.modelName}
             </div>
-            <MapWithOllamaModel
-              db={myDuckDB}
-              summaryOfTableSchemes={summaryOfTableSchemes!}
-              modelName="llama3.2:1b"
-            />
+            <MapWithOllamaModel db={myDuckDB} model={model} />
           </div>
         ))}
     </div>
