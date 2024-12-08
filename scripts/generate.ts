@@ -12,6 +12,7 @@ await db.exec(`INSTALL spatial; LOAD spatial;`);
 await db.exec(`
   CREATE TABLE countries AS SELECT * FROM ST_READ('public/ne_10m_admin_0_countries.geojson')
 `);
+
 const conn = await db.connect();
 const result1 = await conn.all(`SHOW;`);
 let summaryOfSchemas = "";
@@ -51,7 +52,7 @@ const generateGeospatialSQL = async (
   llmModel: OllamaModel,
   questionAndAnswer: {
     question: string;
-    answers: string[];
+    answers: string;
   }
 ) => {
   console.log(`>>>>> ----- ----- ${llmModel.modelName} ----- ----- -----`);
@@ -81,7 +82,7 @@ const generateGeospatialSQL = async (
       const outputs = result.map((row) => row.name);
       // outputs と answers が一致しているかどうか確認する。順番は問わない
       const output = outputs.sort().join(",");
-      const answer = questionAndAnswer.answers.sort().join(",");
+      const answer = questionAndAnswer.answers.split(",").sort().join(",");
       if (output === answer) {
         console.info("Correct SQL generated!");
       } else {
@@ -100,8 +101,8 @@ const generateGeospatialSQL = async (
 
 const questionAndAnswerList = [
   {
-    question: "Which land area is larger, Japan or Taiwan?",
-    answers: ["Japan"],
+    question: "List all countries that border Afghanistan.",
+    answers: "",
   },
 ];
 
@@ -121,7 +122,7 @@ for (const llmModel of ollamaModels) {
   // 2B
   //const maxParamSize = 2000000000;
   // 1B
-  const maxParamSize = 1000000000;
+  const maxParamSize = 2000000000;
   if (!modelParamSize) {
     continue;
   }
