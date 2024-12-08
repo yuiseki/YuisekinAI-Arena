@@ -75,7 +75,7 @@ const generateGeospatialSQL = async (
   }
 
   console.log(sql);
-  if (sql) {
+  if (sql && sql.length > 0) {
     const result = await executeSQL(sql);
     if (result) {
       const outputs = result.map((row) => row.name);
@@ -100,12 +100,8 @@ const generateGeospatialSQL = async (
 
 const questionAndAnswerList = [
   {
-    question: "Which country is closest to Japan?",
-    answers: ["Russia"],
-  },
-  {
-    question: "After Antarctica, which country has the largest area?",
-    answers: ["Russia"],
+    question: "Which land area is larger, Japan or Taiwan?",
+    answers: ["Japan"],
   },
 ];
 
@@ -121,11 +117,15 @@ for (const llmModel of ollamaModels) {
     modelParamSize =
       parseFloat(llmModel.modelName.split(":")[1].replace("m", "")) * 1000000;
   }
-  // 2000000000 よりの大きかったらスキップ
+  // maxParamSize よりの大きかったらスキップ
+  // 2B
+  //const maxParamSize = 2000000000;
+  // 1B
+  const maxParamSize = 1000000000;
   if (!modelParamSize) {
     continue;
   }
-  if (modelParamSize > 2000000000) {
+  if (modelParamSize > maxParamSize) {
     continue;
   }
   console.log("modelName:", llmModel.modelName);
