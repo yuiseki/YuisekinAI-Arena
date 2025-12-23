@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@duckdb/duckdb-wasm": "^1.29.0",
-    "@langchain/core": "^0.3.22",
+    "@langchain/core": "^0.3.80",
     "@langchain/ollama": "^0.1.2",
     "@turf/turf": "^7.1.0",
     "apache-arrow": "^18.1.0",
